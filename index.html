@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ローテーション表</title>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="app-title">ローテーション表</span>
+  <div class="week-nav">
+    <button class="btn btn-icon" id="prevWeek">&#8592;</button>
+    <span class="week-lbl" id="weekLbl"></span>
+    <button class="btn btn-icon" id="nextWeek">&#8594;</button>
+    <button class="btn" id="todayBtn">今週</button>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn btn-green" id="printBtn">印刷</button>
+</div>
+
+<div class="layout">
+  <div class="sched-wrap" id="schedWrap">
+    <div class="sched-drag-handle" id="schedHandle">
+      <div class="sched-drag-dots">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <span class="sched-drag-title">シフト表</span>
+    </div>
+    <div class="sched-scroll">
+      <div>
+        <div class="time-header">
+          <div class="corner">時間</div>
+          <div class="time-slots" id="timeSlots"></div>
+        </div>
+        <div id="dayRows"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="panel">
+      <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between;" id="staffPanelHead">
+        <span>スタッフ</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="btn-bulk-wage" id="bulkWageBtn">時給一括変更</button>
+          <span class="panel-toggle open">▲</span>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div id="staffList"></div>
+        <div class="add-form">
+          <input class="fi" id="newName" type="text" placeholder="名前" />
+          <input class="fi" id="newWage" type="number" placeholder="時給 (円)" min="0" step="10" />
+          <button class="add-btn" id="addStaffBtn">＋ 追加</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between;" id="costPanelHead">
+        <span>人件費（週合計）</span><span class="panel-toggle open">▲</span>
+      </div>
+      <div class="panel-body" id="costPanel"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between;" id="zonePanelHead">
+        <span>時間帯設定</span><span class="panel-toggle open">▲</span>
+      </div>
+      <div class="panel-body" id="zoneSettingPanel"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between;" id="allowancePanelHead">
+        <span>手当設定</span><span class="panel-toggle open">▲</span>
+      </div>
+      <div class="panel-body">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">ゾーンセルの「★手当あり」に適用されます</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <span style="font-size:12px;">定額</span>
+          <input class="zfi" type="number" min="0" step="10" id="allowanceFlat" placeholder="0" style="width:70px;text-align:right;" />
+          <span style="font-size:12px;">円</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:12px;">時給UP</span>
+          <input class="zfi" type="number" min="0" step="1" id="allowancePct" placeholder="0" style="width:70px;text-align:right;" />
+          <span style="font-size:12px;">%</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between;" id="backupPanelHead">
+        <span>バックアップ</span><span class="panel-toggle open">▲</span>
+      </div>
+      <div class="panel-body">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">開くたびに自動で上書き保存されます</div>
+        <button style="background:none;border:1px solid #e0a0a0;border-radius:4px;padding:5px;font-size:11px;font-family:'Noto Sans JP',sans-serif;cursor:pointer;color:#a04040;width:100%;margin-bottom:8px;" id="resetBtn">🗑 全データをリセット</button>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button style="background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:6px;font-size:12px;font-family:'Noto Sans JP',sans-serif;cursor:pointer;color:var(--text2);" id="exportBtn">💾 手動バックアップ</button>
+          <label style="background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:6px;font-size:12px;font-family:'Noto Sans JP',sans-serif;cursor:pointer;color:var(--text2);text-align:center;display:block;">
+            📂 読み込む
+            <input type="file" accept=".json" style="display:none;" id="importFile" />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- スタッフピッカー -->
+<div id="staffPicker" style="display:none;position:fixed;z-index:500;background:var(--surface);border:1px solid var(--border2);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.15);min-width:160px;overflow:hidden;">
+  <div style="padding:6px 10px;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.08em;border-bottom:1px solid var(--border);background:var(--surface2);">スタッフを選択</div>
+  <div id="pickerList" style="max-height:200px;overflow-y:auto;"></div>
+  <div style="border-top:1px solid var(--border);">
+    <div id="pickerClear" style="padding:7px 12px;font-size:12px;cursor:pointer;color:var(--text3);">クリア</div>
+  </div>
+</div>
+
+<!-- スタッフ編集モーダル -->
+<div class="overlay" id="staffEditOverlay">
+  <div class="modal" style="width:280px;">
+    <div class="modal-title">スタッフを編集</div>
+    <div class="mf">
+      <div class="ml">名前</div>
+      <input class="ms" id="seNameInput" type="text" />
+    </div>
+    <div class="mf">
+      <div class="ml">時給（円）</div>
+      <input class="ms" id="seWageInput" type="number" min="0" step="10" />
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" id="staffEditCancel">キャンセル</button>
+      <button class="mbtn-save" id="staffEditSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 時給一括変更モーダル -->
+<div class="overlay" id="bulkOverlay">
+  <div class="modal" style="width:280px;">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:14px;">全スタッフの時給を同じ金額に変更します。</div>
+    <div class="mf">
+      <div class="ml">新しい時給（円）</div>
+      <input class="ms" id="bulkWageInput" type="number" min="0" step="10" placeholder="例: 1050" />
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" id="bulkCancel">キャンセル</button>
+      <button class="mbtn-save" id="bulkSave">全員に適用</button>
+    </div>
+  </div>
+</div>
+
+<!-- シフト追加・編集モーダル -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">シフトを追加</div>
+    <div class="mf">
+      <div class="ml">スタッフ</div>
+      <select class="ms" id="mStaff"></select>
+    </div>
+    <div class="mf">
+      <div class="ml">開始時刻</div>
+      <select class="ms" id="mStart"></select>
+    </div>
+    <div class="mf">
+      <div class="ml">終了時刻</div>
+      <select class="ms" id="mEnd"></select>
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" id="modalCancel">キャンセル</button>
+      <button class="mbtn-del" id="mDelBtn" style="display:none">削除</button>
+      <button class="mbtn-save" id="modalSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 右クリックメニュー -->
+<div class="ctxmenu" id="ctxmenu">
+  <div class="ctx-item" id="ctxEdit">✏ 編集</div>
+  <div class="ctx-item red" id="ctxDel">🗑 削除</div>
+</div>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
