@@ -158,12 +158,19 @@ function renderDayRows() {
     headRow.appendChild(headLbl);
     const cwH = getCW();
     const headBg = document.createElement('div');
-    headBg.style.cssText = `position:relative;width:${CONFIG.DISPLAY_SLOTS * cwH}px;min-width:${CONFIG.DISPLAY_SLOTS * cwH}px;flex-shrink:0;height:var(--day-head-h);overflow:hidden;`;
-    for (let s = 0; s < CONFIG.DISPLAY_SLOTS; s++) {
-      const line = document.createElement('div');
-      line.style.cssText = `position:absolute;left:${s * cwH}px;width:${cwH}px;top:0;bottom:0;border-right:1px solid ${s % 2 === 0 ? 'var(--border2)' : 'var(--border)'};box-sizing:border-box;`;
-      headBg.appendChild(line);
-    }
+headBg.style.cssText = `position:relative;width:${CONFIG.DISPLAY_SLOTS * cwH}px;min-width:${CONFIG.DISPLAY_SLOTS * cwH}px;flex-shrink:0;height:var(--day-head-h);overflow:hidden;`;
+
+for (let s = 0; s < CONFIG.DISPLAY_SLOTS; s++) {
+  const line = document.createElement('div');
+  line.style.cssText = `position:absolute;left:${s * cwH}px;width:${cwH}px;top:0;bottom:0;border-right:1px solid ${s % 2 === 0 ? 'var(--border2)' : 'var(--border)'};box-sizing:border-box;`;
+  if (s % 2 === 0) {
+    const timeLabel = document.createElement('span');
+    timeLabel.style.cssText = 'position:absolute;bottom:2px;left:2px;font-size:9px;font-weight:600;color:var(--text3);';
+    timeLabel.textContent = String(s / 2);
+    line.appendChild(timeLabel);
+  }
+  headBg.appendChild(line);
+}
     headRow.appendChild(headBg);
     block.appendChild(headRow);
     const allLanes = getLanePacking(ds, 3);
