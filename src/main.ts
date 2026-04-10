@@ -163,7 +163,7 @@ headBg.style.cssText = `position:relative;width:${CONFIG.DISPLAY_SLOTS * cwH}px;
 for (let s = 0; s < CONFIG.DISPLAY_SLOTS; s++) {
   const line = document.createElement('div');
   const isHour = s % 2 === 0;
-  line.style.cssText = `position:absolute;left:${s * cwH}px;width:${cwH}px;top:0;bottom:0;border-right:1px ${isHour ? 'solid var(--border2)' : 'dashed var(--border)'};box-sizing:border-box;`;
+  line.style.cssText = `position:absolute;left:${s * cw}px;width:${cw}px;top:0;bottom:0;border-right:1px ${s % 2 === 0 ? 'solid var(--border2)' : 'dashed var(--border)'};box-sizing:border-box;`;
   const timeLabel = document.createElement('span');
   timeLabel.style.cssText = `position:absolute;bottom:2px;left:2px;font-weight:600;color:var(--text3);`;
   if (isHour) {
@@ -202,7 +202,7 @@ function buildLaneRow(lane: number, laneItems: { staffId: string; shiftIdx: numb
   grid.className = 'lane-grid';
   for (let s = 0; s < CONFIG.DISPLAY_SLOTS; s++) {
     const line = document.createElement('div');
-    line.style.cssText = `position:absolute;left:${s * cw}px;width:${cw}px;top:0;bottom:0;border-right:1px solid ${s % 2 === 0 ? 'var(--border2)' : 'var(--border)'};box-sizing:border-box;`;
+    line.style.cssText = `position:absolute;left:${s * cw}px;width:${cw}px;top:0;bottom:0;border-left:1px solid ${s % 2 === 0 ? 'var(--border2)' : 'var(--border)'};box-sizing:border-box;`;
     grid.appendChild(line);
   }
   tl.appendChild(grid);
